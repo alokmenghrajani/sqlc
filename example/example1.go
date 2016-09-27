@@ -4,41 +4,41 @@ import (
   "fmt"
   "os"
   _ "github.com/mattn/go-sqlite3"
-//  "database/sql"
   "github.com/alokmenghrajani/sqlc/sqlc"
 )
-
-// FOR THE README: https://github.com/square/squalor
-// https://github.com/Masterminds/squirrel
-// https://github.com/dropbox/godropbox/tree/master/database/sqlbuilder
-
+/*
+type Book struct {
+  ID     int  `db:"id"`
+  Title  string `db:"title"`
+  Author int `db:"author"`
+}
+*/
 func main() {
-  os.Remove("./example1.db")
-  db, err := sqlc.Open(sqlc.Sqlite, "./example1.db")
+  os.Remove("/tmp/example1.db")
+  db, err := sqlc.Open(sqlc.Sqlite, "/tmp/example1.db")
   panicOnError(err)
-  defer db.Close()  
+  defer db.Close()
 
-  _, err = db.Exec("CREATE TABLE authors (id int, name varchar(255))")
+  _, err = db.Exec("CREATE TABLE books (id int primary key, title varchar(255), author int)")
+  panicOnError(err)
 
   // Sample insert
-  db.InsertInto(AUTHORS).Set(AUTHORS.NAME, "toto").Set(AUTHORS.ID, 10).Exec()
-  db.InsertInto(AUTHORS).Set(AUTHORS.NAME, "xyz").Set(AUTHORS.ID, 20).Exec()
+  db.InsertInto(BOOKS).Set(BOOKS.TITLE, "Defender Of Greatness").Set(BOOKS.ID, 1).Set(BOOKS.AUTHOR, 1234).Exec()
+  db.InsertInto(BOOKS).Set(BOOKS.TITLE, "Destiny Of Silver").Set(BOOKS.ID, 3).Set(BOOKS.AUTHOR, 1234).Exec()
 
   // Sample update
-  db.Update(AUTHORS).Set(AUTHORS.NAME, "haha").Where(AUTHORS.ID.Eq(10)).Exec()
+  db.Update(BOOKS).Set(BOOKS.ID, 3).Where(BOOKS.ID.Eq(2)).Exec()
 
   // Sample query
-  rows, err := db.Select(AUTHORS.NAME, AUTHORS.ID).From(AUTHORS).Query()
+  rows, err := db.Select().From(BOOKS).Query()
   panicOnError(err)
   defer rows.Close()
   for rows.Next() {
-    var name string
-    var id int
-    err := rows.Scan(&name, &id)
+    var book books
+    err := rows.StructScan(&book)
     panicOnError(err)
-    fmt.Printf("here: %s, %d\n", name, id)
+    fmt.Printf("%d: title: %s, author: %d\n", book.Id, book.Title, book.Author)
   }
-  fmt.Printf("done")
 }
 
 func panicOnError(err error) {

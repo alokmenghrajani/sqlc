@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type PredicateType int
@@ -121,7 +123,7 @@ type SelectLimitStep interface {
 
 type InsertResultStep interface {
 	Renderable
-	Fetch() (*sql.Row, error)
+	Fetch() (*sqlx.Row, error)
 }
 
 type InsertSetMoreStep interface {
@@ -149,8 +151,8 @@ type Queryable interface {
 type Query interface {
 	Renderable
 	Selectable
-	Query() (*sql.Rows, error)
-	QueryRow() (*sql.Row, error)
+	Query() (*sqlx.Rows, error)
+	QueryRow() (*sqlx.Row, error)
 }
 
 type Executable interface {
@@ -183,7 +185,7 @@ type update struct {
 }
 
 type DB struct {
-	*sql.DB
+	*sqlx.DB
 	dialect Dialect
 }
 
@@ -197,7 +199,7 @@ func (dialect Dialect) string() string {
 }
 
 func Open(dialect Dialect, dataSourceName string) (*DB, error) {
-	db, err := sql.Open(dialect.string(), dataSourceName)
+	db, err := sqlx.Open(dialect.string(), dataSourceName)
 	if err != nil {
 		return nil, err
 	}
@@ -261,8 +263,7 @@ func (u *update) Set(f TableField, v interface{}) UpdateSetMoreStep {
 			if ok {
 	 			u.SetTime(f, _v)
 	 		}
-			panic(fmt.Sprintf("%s expects a time, got %s.", f.Name(), reflect.TypeOf(v)))	 		
+			panic(fmt.Sprintf("%s expects a time, got %s.", f.Name(), reflect.TypeOf(v)))
 	}
 	panic("unreachable")
 }
-

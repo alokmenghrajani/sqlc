@@ -2,11 +2,12 @@ package sqlc
 
 import (
 	"bytes"
-	"database/sql"
 	"fmt"
-	"github.com/0x6e6562/gosnow"
 	"io"
 	"strings"
+
+	"github.com/0x6e6562/gosnow"
+	"github.com/jmoiron/sqlx"
 )
 
 var flake, _ = gosnow.Default()
@@ -105,16 +106,16 @@ func (sl *selection) OrderBy(f ...Field) SelectLimitStep {
 	return sl
 }
 
-func (s *selection) QueryRow() (*sql.Row, error) {
+func (s *selection) QueryRow() (*sqlx.Row, error) {
 	var buf bytes.Buffer
 	args := s.Render(s.DB().dialect, &buf)
-	return s.DB().QueryRow(buf.String(), args...), nil
+	return s.DB().QueryRowx(buf.String(), args...), nil
 }
 
-func (s *selection) Query() (*sql.Rows, error) {
+func (s *selection) Query() (*sqlx.Rows, error) {
 	var buf bytes.Buffer
 	args := s.Render(s.DB().dialect, &buf)
-	return s.DB().Query(buf.String(), args...)
+	return s.DB().Queryx(buf.String(), args...)
 }
 
 func (s *selection) String(d Dialect) string {

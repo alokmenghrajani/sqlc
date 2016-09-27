@@ -6,6 +6,8 @@ import (
 	"time"
 	"fmt"
 	"reflect"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type insert struct {
@@ -32,10 +34,10 @@ func (i *insert) Returning(f TableField) InsertResultStep {
 	return i
 }
 
-func (i *insert) Fetch() (*sql.Row, error) {
+func (i *insert) Fetch() (*sqlx.Row, error) {
 	var buf bytes.Buffer
 	args := i.Render(i.DB().dialect, &buf)
-	return i.DB().QueryRow(buf.String(), args...), nil
+	return i.DB().QueryRowx(buf.String(), args...), nil
 }
 
 func (i *insert) _set(f TableField, v interface{}) InsertSetMoreStep {
@@ -72,8 +74,7 @@ func (i *insert) Set(f TableField, v interface{}) InsertSetMoreStep {
 			if ok {
 	 			i.SetTime(f, _v)
 	 		}
-			panic(fmt.Sprintf("%s expects a time, got %s.", f.Name(), reflect.TypeOf(v)))	 		
+			panic(fmt.Sprintf("%s expects a time, got %s.", f.Name(), reflect.TypeOf(v)))
 	}
 	panic("unreachable")
 }
-
