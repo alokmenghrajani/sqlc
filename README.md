@@ -1,10 +1,29 @@
 sqlc
-----
+====
 
 [![Build Status](https://travis-ci.org/alokmenghrajani/sqlc.png?branch=master)](https://travis-ci.org/alokmenghrajani/sqlc)
 [![GoDoc](http://godoc.org/_?status.png)](http://godoc.org/github.com/alokmenghrajani/sqlc)
 
 `sqlc` is a composable, type safe and fluent API to generate nested and complex SQL queries.
+
+I forked the code from [relops/sqlc](https://github.com/relops/sqlc) and modified the API to suite my
+taste. I also added [jmoiron/sqlx](https://github.com/jmoiron/sqlx) to the mix so result rows magically
+become Go structs.
+
+As a result, the documentation/example/tests are probably broken.
+
+Other Go ORM (Object-Relational Mapping) libraries
+--------------------------------------------------
+* [database/sql](https://golang.org/pkg/database/sql/)
+* [jmoiron/sqlx](https://github.com/jmoiron/sqlx)
+* [relops/sqlc](https://github.com/relops/sqlc)
+* [square/squalor](https://github.com/square/squalor)
+* [jinzhu/gorm](https://github.com/jinzhu/gorm)
+* [Masterminds/squirrel](https://github.com/Masterminds/squirrel)
+* [sqlbuilder](https://github.com/dropbox/godropbox/tree/master/database/sqlbuilder)
+
+Old docs
+--------
 
 Taking heavy inspiration from [JOOQ][], `sqlc` generates SQL queries for you:
 
