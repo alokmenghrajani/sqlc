@@ -6,13 +6,7 @@ import (
   _ "github.com/mattn/go-sqlite3"
   "github.com/alokmenghrajani/sqlc/sqlc"
 )
-/*
-type Book struct {
-  ID     int  `db:"id"`
-  Title  string `db:"title"`
-  Author int `db:"author"`
-}
-*/
+
 func main() {
   os.Remove("/tmp/example1.db")
   db, err := sqlc.Open(sqlc.Sqlite, "/tmp/example1.db")
