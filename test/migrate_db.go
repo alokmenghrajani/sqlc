@@ -8,8 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/relops/sqlc/sqlc"
-	"github.com/relops/sqlc/test"
+	"github.com/alokmenghrajani/sqlc/sqlc"
+	"github.com/alokmenghrajani/sqlc/test"
 	"log"
 	"os"
 )

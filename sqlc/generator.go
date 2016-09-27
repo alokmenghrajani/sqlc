@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/relops/sqlc/meta"
+	"github.com/alokmenghrajani/sqlc/meta"
 	"io/ioutil"
 	"log"
 	"os"

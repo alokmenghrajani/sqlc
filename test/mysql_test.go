@@ -3,8 +3,8 @@ package test
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/relops/sqlc/sqlc"
-	"github.com/relops/sqlc/test/generic"
+	"github.com/alokmenghrajani/sqlc/sqlc"
+	"github.com/alokmenghrajani/sqlc/test/generic"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
