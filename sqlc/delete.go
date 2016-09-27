@@ -12,8 +12,13 @@ type DeleteWhereStep interface {
 }
 
 type deletion struct {
+	db 			  *DB
 	table     TableLike
 	predicate []Condition
+}
+
+func (d *deletion) DB() *DB {
+	return d.db
 }
 
 func Delete(t TableLike) DeleteWhereStep {
@@ -25,8 +30,8 @@ func (d *deletion) Where(c ...Condition) Executable {
 	return d
 }
 
-func (d *deletion) Exec(dl Dialect, db *sql.DB) (sql.Result, error) {
-	return exec(dl, d, db)
+func (d *deletion) Exec() (sql.Result, error) {
+	return exec(d)
 }
 
 func (d *deletion) String(dl Dialect) string {

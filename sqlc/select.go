@@ -12,6 +12,7 @@ import (
 var flake, _ = gosnow.Default()
 
 type selection struct {
+	db         *DB
 	selection  Selectable
 	projection []Field
 	predicate  []Condition
@@ -24,8 +25,12 @@ type selection struct {
 	alias      string
 }
 
-func Select(f ...Field) SelectFromStep {
-	return &selection{projection: f}
+func (s *selection) DB() *DB {
+	return s.db
+}
+
+func (db *DB) Select(f ...Field) SelectFromStep {
+	return &selection{db: db, projection: f}
 }
 
 func SelectCount() SelectFromStep {
@@ -100,16 +105,16 @@ func (sl *selection) OrderBy(f ...Field) SelectLimitStep {
 	return sl
 }
 
-func (s *selection) QueryRow(d Dialect, db *sql.DB) (*sql.Row, error) {
+func (s *selection) QueryRow() (*sql.Row, error) {
 	var buf bytes.Buffer
-	args := s.Render(d, &buf)
-	return db.QueryRow(buf.String(), args...), nil
+	args := s.Render(s.DB().dialect, &buf)
+	return s.DB().QueryRow(buf.String(), args...), nil
 }
 
-func (s *selection) Query(d Dialect, db *sql.DB) (*sql.Rows, error) {
+func (s *selection) Query() (*sql.Rows, error) {
 	var buf bytes.Buffer
-	args := s.Render(d, &buf)
-	return db.Query(buf.String(), args...)
+	args := s.Render(s.DB().dialect, &buf)
+	return s.DB().Query(buf.String(), args...)
 }
 
 func (s *selection) String(d Dialect) string {

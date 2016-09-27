@@ -1,28 +1,35 @@
 package sqlc
 
 import (
-	"bytes"
-	"compress/gzip"
+//	"bytes"
+//	"compress/gzip"
 	"fmt"
-	"io"
+//	"io"
+	"io/ioutil"
 	"strings"
 )
 
 func bindata_read(data []byte, name string) ([]byte, error) {
-	gz, err := gzip.NewReader(bytes.NewBuffer(data))
+	b, err := ioutil.ReadFile(name)
 	if err != nil {
-		return nil, fmt.Errorf("Read %q: %v", name, err)
+		return nil, fmt.Errorf("Read: %q: %v", name, err)
 	}
+	return b, nil
 
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, gz)
-	gz.Close()
+	// gz, err := gzip.NewReader(bytes.NewBuffer(data))
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Read %q: %v", name, err)
+	// }
 
-	if err != nil {
-		return nil, fmt.Errorf("Read %q: %v", name, err)
-	}
+	// var buf bytes.Buffer
+	// _, err = io.Copy(&buf, gz)
+	// gz.Close()
 
-	return buf.Bytes(), nil
+	// if err != nil {
+	// 	return nil, fmt.Errorf("Read %q: %v", name, err)
+	// }
+
+	// return buf.Bytes(), nil
 }
 
 func sqlc_tmpl_fields_tmpl() ([]byte, error) {

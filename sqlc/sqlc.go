@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"database/sql"
 	"io"
+	"fmt"
+	"reflect"
+	"time"
 )
 
 type PredicateType int
@@ -118,7 +121,7 @@ type SelectLimitStep interface {
 
 type InsertResultStep interface {
 	Renderable
-	Fetch(Dialect, *sql.DB) (*sql.Row, error)
+	Fetch() (*sql.Row, error)
 }
 
 type InsertSetMoreStep interface {
@@ -136,6 +139,7 @@ type UpdateSetMoreStep interface {
 type Renderable interface {
 	Render(Dialect, io.Writer) []interface{}
 	String(Dialect) string
+	DB() *DB
 }
 
 type Queryable interface {
@@ -145,13 +149,13 @@ type Queryable interface {
 type Query interface {
 	Renderable
 	Selectable
-	Query(Dialect, *sql.DB) (*sql.Rows, error)
-	QueryRow(Dialect, *sql.DB) (*sql.Row, error)
+	Query() (*sql.Rows, error)
+	QueryRow() (*sql.Row, error)
 }
 
 type Executable interface {
 	Renderable
-	Exec(Dialect, *sql.DB) (sql.Result, error)
+	Exec() (sql.Result, error)
 }
 
 type Selectable interface {
@@ -172,13 +176,40 @@ type join struct {
 }
 
 type update struct {
+	db        *DB
 	table     TableLike
 	bindings  []TableFieldBinding
 	predicate []Condition
 }
 
-func Update(t TableLike) UpdateSetStep {
-	return &update{table: t}
+type DB struct {
+	*sql.DB
+	dialect Dialect
+}
+
+func (dialect Dialect) string() string {
+	switch dialect {
+		case Sqlite: return "sqlite3"
+		case MySQL: return "mysql"
+		case Postgres: return "postgres"
+	}
+	return ""
+}
+
+func Open(dialect Dialect, dataSourceName string) (*DB, error) {
+	db, err := sql.Open(dialect.string(), dataSourceName)
+	if err != nil {
+		return nil, err
+	}
+	return &DB{db, dialect}, nil
+}
+
+func (db *DB) Update(t TableLike) UpdateSetStep {
+	return &update{db: db, table: t}
+}
+
+func (u *update) DB() *DB {
+	return u.db
 }
 
 func (u *update) Where(c ...Condition) Executable {
@@ -186,18 +217,52 @@ func (u *update) Where(c ...Condition) Executable {
 	return u
 }
 
-func (u *update) set(f TableField, v interface{}) UpdateSetMoreStep {
+func (u *update) _set(f TableField, v interface{}) UpdateSetMoreStep {
 	binding := TableFieldBinding{Field: f, Value: v}
 	u.bindings = append(u.bindings, binding)
 	return u
 }
 
-func (u *update) Exec(d Dialect, db *sql.DB) (sql.Result, error) {
-	return exec(d, u, db)
+func (u *update) Exec() (sql.Result, error) {
+	return exec(u)
 }
 
-func exec(d Dialect, r Renderable, db *sql.DB) (sql.Result, error) {
+func exec(r Renderable) (sql.Result, error) {
 	var buf bytes.Buffer
-	args := r.Render(d, &buf)
-	return db.Exec(buf.String(), args...)
+	args := r.Render(r.DB().dialect, &buf)
+	return r.DB().Exec(buf.String(), args...)
 }
+
+func (u *update) Set(f TableField, v interface{}) UpdateSetMoreStep {
+	switch f := f.(type) {
+		case StringField:
+			_v, ok := v.(string)
+			if ok {
+				return u.SetString(f, _v)
+			}
+			panic(fmt.Sprintf("%s expects a string, got %s.", f.Name(), reflect.TypeOf(v)))
+
+		case IntField:
+			_v, ok := v.(int)
+			if ok {
+				return u.SetInt(f, _v)
+			}
+			panic(fmt.Sprintf("%s expects an int, got %s.", f.Name(), reflect.TypeOf(v)))
+
+		case Int64Field:
+			_v, ok := v.(int64)
+			if ok {
+				return u.SetInt64(f, _v)
+			}
+			panic(fmt.Sprintf("%s expects an int64, got %s.", f.Name(), reflect.TypeOf(v)))
+
+		case TimeField:
+			_v, ok := v.(time.Time)
+			if ok {
+	 			u.SetTime(f, _v)
+	 		}
+			panic(fmt.Sprintf("%s expects a time, got %s.", f.Name(), reflect.TypeOf(v)))	 		
+	}
+	panic("unreachable")
+}
+

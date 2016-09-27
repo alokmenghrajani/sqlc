@@ -18,7 +18,8 @@ type InsertSetStep interface {
  	SetInt64(Int64Field, int64) InsertSetMoreStep
  	
  	SetTime(TimeField, time.Time) InsertSetMoreStep
- 	
+
+ 	Set(TableField, interface{}) InsertSetMoreStep 	
 }
 
 type UpdateSetStep interface {
@@ -31,41 +32,42 @@ type UpdateSetStep interface {
  	
  	SetTime(TimeField, time.Time) UpdateSetMoreStep
  	
+ 	Set(TableField, interface{}) UpdateSetMoreStep 	
 }
 
 
 func (i *insert) SetString(f StringField, v string) InsertSetMoreStep {
-	return i.set(f,v)
+	return i._set(f,v)
 }
 
 func (i *insert) SetInt(f IntField, v int) InsertSetMoreStep {
-	return i.set(f,v)
+	return i._set(f,v)
 }
 
 func (i *insert) SetInt64(f Int64Field, v int64) InsertSetMoreStep {
-	return i.set(f,v)
+	return i._set(f,v)
 }
 
 func (i *insert) SetTime(f TimeField, v time.Time) InsertSetMoreStep {
-	return i.set(f,v)
+	return i._set(f,v)
 }
 
 
 
 func (u *update) SetString(f StringField, v string) UpdateSetMoreStep {
-	return u.set(f,v)
+	return u._set(f,v)
 }
 
 func (u *update) SetInt(f IntField, v int) UpdateSetMoreStep {
-	return u.set(f,v)
+	return u._set(f,v)
 }
 
 func (u *update) SetInt64(f Int64Field, v int64) UpdateSetMoreStep {
-	return u.set(f,v)
+	return u._set(f,v)
 }
 
 func (u *update) SetTime(f TimeField, v time.Time) UpdateSetMoreStep {
-	return u.set(f,v)
+	return u._set(f,v)
 }
 
 
